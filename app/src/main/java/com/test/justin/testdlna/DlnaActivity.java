@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,46 +31,25 @@ import org.fourthline.cling.transport.Router;
 
 public class DlnaActivity extends ActionBarActivity {
     private final static String TAG = "DlnaActivity";
-    private AndroidUpnpService upnpService;
-    private DefaultRegistryListener registryListener = new RegistryListenerTest();
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.i(TAG, "Service Connected");
-            upnpService = (AndroidUpnpService) service;
-            // Refresh the list with all known devices
-            //listAdapter.clear();
-            for (Device device : upnpService.getRegistry().getDevices()) {
-                Log.i(TAG, device.getDetails().toString());
-            }
-
-            // Getting ready for future device advertisements
-            upnpService.getRegistry().addListener(registryListener);
-
-            // Search asynchronously for all devices
-            upnpService.getControlPoint().search();
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            upnpService = null;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dlna);
-        getApplicationContext().bindService(new Intent(this, UpnpServiceTestImpl.class),serviceConnection, Context.BIND_AUTO_CREATE);
+
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment fragment = fm.findFragmentById(R.id.fragment_container);
+        if(fragment == null){
+            fragment = new DlnaListFragment();
+            fm.beginTransaction()
+                    .add(R.id.fragment_container,fragment)
+                    .commit();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (upnpService != null) {
-            upnpService.getRegistry().removeListener(registryListener);
-        }
-        getApplicationContext().unbindService(serviceConnection);
     }
 
     @Override
@@ -92,77 +73,5 @@ public class DlnaActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private class RegistryListenerTest extends DefaultRegistryListener{
-        public RegistryListenerTest() {
-            super();
-        }
-
-        @Override
-        public void remoteDeviceDiscoveryStarted(Registry registry, RemoteDevice device) {
-            Log.i(TAG, device.getDetails().getFriendlyName() + " remoteDeviceDiscoveryStarted");
-            super.remoteDeviceDiscoveryStarted(registry, device);
-        }
-
-        @Override
-        public void remoteDeviceDiscoveryFailed(Registry registry, RemoteDevice device, Exception ex) {
-            Log.i(TAG, device.getDetails().getFriendlyName() + " remoteDeviceDiscoveryFailed");
-            super.remoteDeviceDiscoveryFailed(registry, device, ex);
-        }
-
-        @Override
-        public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " added");
-            super.remoteDeviceAdded(registry, device);
-        }
-
-        @Override
-        public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " updated");
-            super.remoteDeviceUpdated(registry, device);
-        }
-
-        @Override
-        public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " removed");
-            super.remoteDeviceRemoved(registry, device);
-        }
-
-        @Override
-        public void localDeviceAdded(Registry registry, LocalDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " localadd");
-            super.localDeviceAdded(registry, device);
-        }
-
-        @Override
-        public void localDeviceRemoved(Registry registry, LocalDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " localremove");
-            super.localDeviceRemoved(registry, device);
-        }
-
-        @Override
-        public void deviceAdded(Registry registry, Device device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " device added");
-            super.deviceAdded(registry, device);
-        }
-
-        @Override
-        public void deviceRemoved(Registry registry, Device device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " device removed");
-            super.deviceRemoved(registry, device);
-        }
-
-        @Override
-        public void beforeShutdown(Registry registry) {
-            Log.i(TAG,"before shutdown");
-            super.beforeShutdown(registry);
-        }
-
-        @Override
-        public void afterShutdown() {
-            Log.i(TAG,"after shutdown");
-            super.afterShutdown();
-        }
     }
 }
