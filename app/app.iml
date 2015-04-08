@@ -98,7 +98,9 @@
     <orderEntry type="library" exported="" name="jetty-http-8.1.8.v20121106" level="project" />
     <orderEntry type="library" exported="" name="jetty-security-8.1.8.v20121106" level="project" />
     <orderEntry type="library" exported="" name="seamless-util-1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" name="seamless-swing-1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" name="jetty-io-8.1.8.v20121106" level="project" />
+    <orderEntry type="library" exported="" name="cling-support-2.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" name="jetty-continuation-8.1.8.v20121106" level="project" />
     <orderEntry type="library" exported="" name="jetty-server-8.1.8.v20121106" level="project" />
     <orderEntry type="library" exported="" name="jetty-servlet-8.1.8.v20121106" level="project" />

@@ -19,6 +19,7 @@ android {
     }
     packagingOptions{
         exclude 'about.html'
+        exclude 'META-INF/beans.xml'
     }
 }
 
@@ -32,6 +33,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'org.fourthline.cling:cling-core:2.0-SNAPSHOT'
+    compile 'org.fourthline.cling:cling-support:2.0-SNAPSHOT'
     compile 'org.eclipse.jetty:jetty-server:8.1.8.v20121106'
     compile 'org.eclipse.jetty:jetty-servlet:8.1.8.v20121106'
     compile 'org.eclipse.jetty:jetty-client:8.1.8.v20121106'

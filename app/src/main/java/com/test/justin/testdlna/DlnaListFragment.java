@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Browser;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,11 +20,26 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.fourthline.cling.android.AndroidUpnpService;
+import org.fourthline.cling.controlpoint.ActionCallback;
+import org.fourthline.cling.model.action.ActionArgumentValue;
+import org.fourthline.cling.model.action.ActionInvocation;
+import org.fourthline.cling.model.message.UpnpResponse;
+import org.fourthline.cling.model.meta.Action;
+import org.fourthline.cling.model.meta.ActionArgument;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.LocalDevice;
 import org.fourthline.cling.model.meta.RemoteDevice;
+import org.fourthline.cling.model.meta.RemoteService;
+import org.fourthline.cling.model.meta.Service;
+import org.fourthline.cling.model.types.UDAServiceId;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
+import org.fourthline.cling.support.contentdirectory.callback.Browse;
+import org.fourthline.cling.support.model.BrowseFlag;
+import org.fourthline.cling.support.model.DIDLContent;
+import org.fourthline.cling.support.model.DescMeta;
+import org.fourthline.cling.support.model.container.Container;
+import org.fourthline.cling.support.model.item.Item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,63 +194,79 @@ public class DlnaListFragment extends Fragment {
 
         @Override
         public void remoteDeviceDiscoveryFailed(Registry registry, RemoteDevice device, Exception ex) {
-            Log.i(TAG, device.getDetails().getFriendlyName() + " remoteDeviceDiscoveryFailed");
             super.remoteDeviceDiscoveryFailed(registry, device, ex);
         }
 
         @Override
         public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " added");
             super.remoteDeviceAdded(registry, device);
         }
 
         @Override
         public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " updated");
             super.remoteDeviceUpdated(registry, device);
         }
 
         @Override
         public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " removed");
             super.remoteDeviceRemoved(registry, device);
         }
 
         @Override
         public void localDeviceAdded(Registry registry, LocalDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " localadd");
             super.localDeviceAdded(registry, device);
         }
 
         @Override
         public void localDeviceRemoved(Registry registry, LocalDevice device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " localremove");
             super.localDeviceRemoved(registry, device);
         }
 
         @Override
         public void deviceAdded(Registry registry, Device device) {
             Log.i(TAG,device.getDetails().getFriendlyName() + " device added");
-            Intent intent = new Intent("FUCK");
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+            if(device.getType().getType().equals("MediaServer")){
+                Intent intent = new Intent("FUCK");
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                Service service = device.findService(new UDAServiceId("ContentDirectory"));
+                if(service != null) {
+                    upnpService.getControlPoint().execute(new Browse(service,"2", BrowseFlag.DIRECT_CHILDREN){
+                        @Override
+                        public void received(ActionInvocation actionInvocation, DIDLContent didl) {
+                            Log.i(TAG,"received "+actionInvocation.getAction().getService().getDevice().getDetails().getFriendlyName());
+                            Log.i(TAG,didl.getCount()+"");
+                            for(Container c : didl.getContainers()){
+                                Log.i(TAG,c.getTitle());
+                            }
+                        }
+
+                        @Override
+                        public void updateStatus(Status status) {
+
+                        }
+
+                        @Override
+                        public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+
+                        }
+                    });
+                }
+            }
             super.deviceAdded(registry, device);
         }
 
         @Override
         public void deviceRemoved(Registry registry, Device device) {
-            Log.i(TAG,device.getDetails().getFriendlyName() + " device removed");
             super.deviceRemoved(registry, device);
         }
 
         @Override
         public void beforeShutdown(Registry registry) {
-            Log.i(TAG,"before shutdown");
             super.beforeShutdown(registry);
         }
 
         @Override
         public void afterShutdown() {
-            Log.i(TAG,"after shutdown");
             super.afterShutdown();
         }
     }
